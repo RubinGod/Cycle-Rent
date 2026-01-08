@@ -62,10 +62,14 @@ public class User {
         return name + "," + username + "," + password + "," + role;
     }
 
-    // Parse User from a CSV line (Updated for 4 parts)
+    // Parse User from a CSV line (Updated for 4 parts, backward compatible with 3)
     public static User fromString(String line) {
         String[] parts = line.split(",");
-        if (parts.length != 4) return null;
-        return new User(parts[0], parts[1], parts[2], parts[3]);
+        if (parts.length == 4) {
+            return new User(parts[0], parts[1], parts[2], parts[3]);
+        } else if (parts.length == 3) {
+            return new User(parts[0], parts[1], parts[2], "user"); // Default role
+        }
+        return null;
     }
 }
