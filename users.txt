@@ -5,3 +5,5 @@ rubin,1,rubin,user
 rubin,user,rubin,user
 admin,admin,rubin,user
 rubin,khadka,rubin,User
+rubin,admin,rubin,User
+Rabin,rb,123,User

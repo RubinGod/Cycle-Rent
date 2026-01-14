@@ -3,7 +3,11 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package cyclerent;
+import Model.Cycle;
 import Model.User;
+import Model.Employee;
+import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  *
@@ -11,15 +15,24 @@ import Model.User;
  */
 public class Login extends javax.swing.JFrame {
     
+   private static ArrayList<Cycle> cycleList; 
+    private static LinkedList<Employee> employeeList;
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Login.class.getName());
 
     /**
      * Creates new form Login
      */
-    public Login() {
+   public Login() {
         initComponents();
         
+        // Only initialize if they haven't been created yet (Lazy Initialization)
+        if (cycleList == null) {
+            cycleList = Model.Cycle.getInitialData(); 
+        }
+        if (employeeList == null) {
+            employeeList = Model.Employee.getInitialData();
+        }
     }
     // Verify User credentials from the file
 private Model.User verifyLogin(String Username, String password) {
@@ -71,8 +84,18 @@ private void openSignup() {
     this.dispose(); // close login window
 }
 
+private void loadUserDashboard() {
+    this.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH);
+    this.getContentPane().removeAll();
+    this.setLayout(new java.awt.BorderLayout());
 
+    // Pass 'cycleList' so the user sees the same data the admin manages
+    UserCyclePanel userUI = new UserCyclePanel(this, cycleList); 
+    this.add(userUI, java.awt.BorderLayout.CENTER);
 
+    this.revalidate();
+    this.repaint();
+}
 
 
     /**
@@ -233,25 +256,23 @@ private void openSignup() {
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-                                    
-String Username = jTextField1.getText().trim();
+
+        String Username = jTextField1.getText().trim();
     String password = new String(jPasswordField1.getPassword());
 
     Model.User authenticatedUser = verifyLogin(Username, password);
 
     if (authenticatedUser != null) {
-        javax.swing.JOptionPane.showMessageDialog(this, "Login Successful! Welcome " + authenticatedUser.getName());
-        
-        // Use equalsIgnoreCase for the role check to be safe
         if ("admin".equalsIgnoreCase(authenticatedUser.getRole())) {
-            new admindashboard().setVisible(true); // Open Admin Dashboard
+            // Pass the SHARED lists to the admin dashboard
+            new admindashboard(cycleList, employeeList).setVisible(true); 
+            this.dispose(); 
         } else {
-            new userdashboard().setVisible(true); // This opens your provided userdashboard.java
+            loadUserDashboard();
         }
-        this.dispose(); // Close login window
     } else {
-        javax.swing.JOptionPane.showMessageDialog(this, "Invalid credentials.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
-    } 
+        javax.swing.JOptionPane.showMessageDialog(this, "Invalid credentials.");
+    }
         
     }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -279,7 +300,15 @@ String Username = jTextField1.getText().trim();
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> new Login().setVisible(true));
     }
-
+/**
+ * This method is called by UserCyclePanel to log the user out.
+ * It closes the current maximized dashboard and re-opens the Login window.
+ */
+public void resetToLogin() {
+    new Login().setVisible(true); // Opens a fresh login screen
+    this.dispose(); // Closes the maximized dashboard
+}
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
